@@ -1,10 +1,12 @@
+
+
 /*
 INTERFAZ GRAFICA: Esta parte del sistema experto es la que se encarga de
 interactuar con la persona comun, mostrar imagenes, botones, textos, etc.
 
 INICIAR SISTEMA EXPERTO:
-PARA CORRER EL PROGRAMA, ES NESESARIO CONSULTAR EL ARCHIVO.PL EN PROLOG, 
-AUTOMATICAMENTE SE ABRIRA LA VENTANA DEL PROGRAMA
+PARA CORRER EL PROGRAMA, ES NESESARIO CARGAR LAS 3 PARTES AL SWI PROLOG
+Y LUEGO SOLO CONSULTAR TODO, AUTOMATICAMENTE SE ABRIRA LA VENTANA DEL PROGRAMA
 */
  :- use_module(library(pce)).
  :- pce_image_directory('./imagenes').
@@ -61,13 +63,13 @@ AUTOMATICAMENTE SE ABRIRA LA VENTANA DEL PROGRAMA
                 send(@boton, free),
                 send(@btntratamiento,free),
                 mostrar_diagnostico(Enfermedad),
-                send(@texto, selection('La Recomendacion a partir de los datos es:')),
+                send(@texto, selection('El Diagnostico a partir de los datos es:')),
                 send(@resp1, selection(Enfermedad)),
                 new(@boton, button('Iniciar consulta',
                 message(@prolog, botones)
                 )),
 
-                new(@btntratamiento,button('Detalles y Rutina',
+                new(@btntratamiento,button('Detalles y Tratamiento',
                 message(@prolog, mostrar_tratamiento,Enfermedad)
                 )),
                 send(@main, display,@boton,point(20,450)),
@@ -75,7 +77,7 @@ AUTOMATICAMENTE SE ABRIRA LA VENTANA DEL PROGRAMA
 
 
 
-  mostrar_tratamiento(X):-new(@tratam, dialog('Recomendacion')),
+  mostrar_tratamiento(X):-new(@tratam, dialog('Tratamiento')),
                           send(@tratam, append, label(nombre, 'Explicacion: ')),
                           send(@tratam, display,@lblExp1,point(70,51)),
                           send(@tratam, display,@lblExp2,point(50,80)),
@@ -83,7 +85,7 @@ AUTOMATICAMENTE SE ABRIRA LA VENTANA DEL PROGRAMA
                           send(@tratam, transient_for, @main),
                           send(@tratam, open_centered).
 
-tratamiento(X):- send(@lblExp1,selection('De Acuerdo Al Diagnostico La Recomendacion Es:')),
+tratamiento(X):- send(@lblExp1,selection('De Acuerdo Al Diagnostico El Tratamiento Es:')),
                  mostrar_imagen_tratamiento(@tratam,X).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -107,7 +109,7 @@ tratamiento(X):- send(@lblExp1,selection('De Acuerdo Al Diagnostico La Recomenda
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-  interfaz_principal:-new(@main,dialog('Sistema Experto (Rutinas para gente con diabetes)',
+  interfaz_principal:-new(@main,dialog('Sistema Experto Diagnosticador de Enfermedades deL Goldfish',
         size(1000,1000))),
         new(@texto, label(nombre,'El Diagnostico a partir de los datos es:',font('times','roman',18))),
         new(@resp1, label(nombre,'',font('times','roman',22))),
