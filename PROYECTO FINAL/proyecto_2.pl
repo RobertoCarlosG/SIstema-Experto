@@ -15,6 +15,11 @@
 resource(portada, image, image('streching_menu.jpg')).
 %AGREGAR AQUI LAS IMAGENES DE LOS TRATAMIENTOS CON nombre
 % dieta1,dieta2,dieta3...
+resource(dieta1, image, image('Dieta1.jpg')).
+resource(dieta2, image, image('Dieta2.jpg')).
+resource(dieta3, image, image('Dieta3.jpg')).
+resource(dieta4, image, image('Dieta4.jpg')).
+resource(dieta5, image, image('Dieta5.jpg')).
 resource(img_principal, image, image('streching_menu.jpg')).
 resource(aerobics1, image, image('aerobics1.jpg')).
 resource(aerobics2, image, image('aerobics2.jpg')).
@@ -37,6 +42,7 @@ resource(problemas_respiratorios, image, image('problemas_respiratorios.jpg')).
 resource(chatarra, image, image('chatarra.jpg')).
 resource(azucar, image, image('azucar.jpg')).
 resource(bb_agua, image, image('bb_agua.jpg')).
+
 
 
 mostrar_imagen(Pantalla, Imagen) :- new(Figura, figure),
