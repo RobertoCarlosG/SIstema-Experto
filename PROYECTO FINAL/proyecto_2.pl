@@ -94,7 +94,7 @@ mostrar_tratamiento(X):-new(@tratam, dialog('Recomendacion')),
                           tratamiento(X),
                           send(@tratam, transient_for, @main),
                           send(@tratam, open_centered).
-                    
+
 tratamiento(X):- send(@lblExp1,selection('De Acuerdo Al Diagnostico La Recomendacion Es:')),
                  mostrar_imagen_tratamiento(@tratam,X).
 
@@ -130,9 +130,9 @@ interfaz_principal:-new(@main,dialog('Sistema Experto (Rutinas para gente con di
 
         nueva_imagen(@main, img_principal),
         send(@main, display,@boton,point(138,450)),
-        send(@main, display,@texto,point(20,130)),
+        send(@main, display,@texto,point(20,350)),
         send(@main, display,@salir,point(300,450)),
-        send(@main, display,@resp1,point(20,180)),
+        send(@main, display,@resp1,point(20,390)),
         send(@main,open_centered).
 
        borrado:- send(@resp1, selection('')).
@@ -204,12 +204,12 @@ obten_hipotesis_y_sintomas(Diagnosis, ListaDeSintomas):-
                             conocimiento(Diagnosis, ListaDeSintomas).
 
 
-prueba_presencia_de(Diagnosis, []).
+prueba_presencia_de(_Diagnosis, []).
 prueba_presencia_de(Diagnosis, [Head | Tail]):- prueba_verdad_de(Diagnosis, Head),
                                               prueba_presencia_de(Diagnosis, Tail).
 
 
-prueba_verdad_de(Diagnosis, Sintoma):- conocido(Sintoma).
+prueba_verdad_de(_Diagnosis, Sintoma):- conocido(Sintoma).
 prueba_verdad_de(Diagnosis, Sintoma):- not(conocido(is_false(Sintoma))),
 pregunta_sobre(Diagnosis, Sintoma, Reply), Reply = 'si'.
 
@@ -218,11 +218,11 @@ pregunta_sobre(Diagnosis, Sintoma, Reply):- preguntar(Sintoma,Respuesta),
                           process(Diagnosis, Sintoma, Respuesta, Reply).
 
 
-process(Diagnosis, Sintoma, si, si):- asserta(conocido(Sintoma)).
-process(Diagnosis, Sintoma, no, no):- asserta(conocido(is_false(Sintoma))).
+process(_Diagnosis, Sintoma, si, si):- asserta(conocido(Sintoma)).
+process(_Diagnosis, Sintoma, no, no):- asserta(conocido(is_false(Sintoma))).
 
 
-clean_scratchpad:- retract(conocido(X)), fail.
+clean_scratchpad:- retract(conocido(_X)), fail.
 clean_scratchpad.
 
 
