@@ -88,14 +88,20 @@ botones:-borrado,
                 send(@main, display,@btntratamiento,point(138,450)).
 
 mostrar_tratamiento(X):-new(@tratam, dialog('Recomendacion')),
-                          send(@tratam, append, label(nombre, 'Explicacion: ')),
+                          %new(L, dialog_group('')),
+                          %send(L,size,size(310,320)),
+                          %new(R, dialog_group('')),
+                          %send(R,size,size(420,320)),
+                          %send(@tratam, append,L),
+                          %send(@tratam, append, R, right),
+                          send(@tratam, append, label(nombre, 'Explicacion: \n La gente con diabetes debe cuidarse siempre, \nhacer ejercicio de bajo impacto y como pedimos aqui \n revisarse las piernas constantemente')),
                           send(@tratam, display,@lblExp1,point(70,51)),
                           send(@tratam, display,@lblExp2,point(50,80)),
                           tratamiento(X),
                           send(@tratam, transient_for, @main),
                           send(@tratam, open_centered).
 
-tratamiento(X):- send(@lblExp1,selection('De Acuerdo Al Diagnostico La Recomendacion Es:')),
+tratamiento(X):- send(@lblExp1,selection('\n             La Recomendacion Es:')),
                  mostrar_imagen_tratamiento(@tratam,X).
 
 %Comportamiento, aqui se ciclan las preguntas al hacer return y almacenar en respuesta, se vuelve a enviar la funcion con los datos enviados
@@ -119,6 +125,12 @@ preguntar(Preg,Resp):-new(Di,dialog('Colsultar Datos:')),
 %Pantalla 1
 interfaz_principal:-new(@main,dialog('Sistema Experto (Rutinas para gente con diabetes)',
         size(1000,1000))),
+        %new(L, dialog_group('')),
+        %send(L,size,size(310,320)),
+        %new(R, dialog_group('')),
+        %send(R,size,size(420,320)),
+        %send(@main, append,L),
+        %send(@main, append, R, right),
         new(@texto, label(nombre,'El Diagnostico a partir de los datos es:',font('times','roman',18))),
         new(@resp1, label(nombre,'',font('times','roman',22))),
         new(@lblExp1, label(nombre,'',font('times','roman',14))),
@@ -145,7 +157,7 @@ crea_interfaz_inicio:- new(@interfaz,dialog('Bienvenido al Sistema Experto Diagn
 
   new(BotonComenzar,button('COMENZAR',and(message(@prolog,interfaz_principal) ,
   and(message(@interfaz,destroy),message(@interfaz,free)) ))),
-  new(BotonSalir,button('SALIDA',and(message(@interfaz,destroy),message(@interfaz,free)))),
+  new(BotonSalir,button('salir',and(message(@interfaz,destroy),message(@interfaz,free)))),
   send(@interfaz,append(BotonComenzar)),
   send(@interfaz,append(BotonSalir)),
   send(@interfaz,open_centered).
