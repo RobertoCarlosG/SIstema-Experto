@@ -1,299 +1,246 @@
-% This Buffer is for notes you don't want to save.
-% If you want to create a file, visit that file with C-x C-f,
-% then enter the text in that file's own buffer.
+% Proyecto  de Inteligencia Artificial
+% Sistema experto
 
-%Importación de la libreria grafica
+%Cargando libreria Grafica y estilo
 :- use_module(library(pce)).
-:- pce_image_directory('./assets').
 :- use_module(library(pce_style_item)).
+:- dynamic color/2.
+%Directorio de imagenes
+:- pce_image_directory('./imagenes').
+%PErmitimos acentos y caracteres especiales
 :- encoding(utf8).
 
-resource(tabla,image,image('tabla.jpg')).
-resource(alimentacion, image, image('alimentacion2.jpg')).
-resource(actividad, image, image('actividad2.jpg')).
-resource(embarazo, image, image('embarazo2.jpg')).
-resource(familia, image, image('familia2.jpg')).
-resource(hipertension, image, image('hiper.jpg')).
-resource(portada, image, image('inicio.jpg')).
-resource(gestacional, image, image('gestacional.jpg')).
+%Cargando recursos
 
-%Funcion para mostrar una imagen
-show_picture(Window, Image):-
-    new(Fig, figure),
-    new(Bitmap, bitmap(resource(Image),@on)),
-    send(Bitmap, name, 1),
-    send(Fig,display,Bitmap),
-    send(Fig,status,1),
-    send(Window,display,Fig).
-
-
-%Regla para obesidad
-reglaObesidad:-
-    new(Window, dialog('Indice de Masa Corporal')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(310,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(420,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, 'El indice de masa corporal (IMC)\n es un indicador de gordura confiable.
-Se considera que un adulto esta en sobrepeso si tiene un
-IMC de entre los 25 y 29.9 kg/m2 y es
-obeso si posee un IMC superior a 30kg/m2.
-(IMC = peso[kg]/estatura[m2]).
-', font('Arial','',14))),
-    send(R, display, Preg,point(20,20)),
-
-    show_picture(L,tabla),
-    new(@pesoItem, text_item('Peso en Kilogramos:')),
-    send(R,display,@pesoItem,point(40,130)),
-    new(@alturaItem, text_item('Altura en centimetros')),
-    send(R, display, @alturaItem,point(40,170)),
-    new(@texto, label(nombre,'Su indice de masa corporal es:')),
-    send(R, display, @texto,point(40,220)),
-    new(@indice, label(nombre,'')),
-    send(R, display, @indice,point(260,220)),
-    new(Calc, button('Calcular IMC', message(@prolog,imc))),
-    send(R, display, Calc, point(100,260)),
-    new(@reglaUno,button('Siguiente',and(message(@prolog,reglaAlimentacion),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaUno, point(390,350)),
-    send(Window, open_centered).
-
-%Funcion Para el calculo de IMC
-imc:-
-    get(@pesoItem,selection,AuxKG),
-    get(@alturaItem,selection,AuxCM),
-    atom_number(AuxKG, KG),
-    atom_number(AuxCM, CM),
-    M is CM/100, Aux is M*M,
-    send(@indice, selection((KG/Aux))).
-
-%Regla para alimentacion
-reglaAlimentacion:-
-    new(Window, dialog('Alimentacion')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(310,340)),
-    new(R, dialog_group('')),
-    send(R,size,size(440,340)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, 'Una dieta sana es la combinacion adecuanda
-de alimentos de diferentes grupos como son
-las frutas, verduras, legumbres (lentejas y alubias),
-cereales integrales (como maiz, avena, trigo),
-lacteos, carnes y la poca cantidad de grasas saturadas.\n
-¿Considera que su alimentacion diaria es saludable?
-', font('Arial', '', 14))),
-    send(R, display, Preg,point(35,50)),
-    show_picture(L,alimentacion),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append,si), send(Op,append,no),
-    send(R,display,Op,point(60,210)),
-    new(@reglaDos,button('Siguiente',and(message(@prolog,reglaActividad),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaDos, point(390,350)),
-    send(Window, open_centered).
-
-%Regla de Actividad Fisica
-reglaActividad:-
-    new(Window, dialog('Actividad Fisica')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(330,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(420,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, 'Se considera como actividad fisica cualquier
-movimiento corporal producido por los musculos que
-exija gasto de energia. Por ejemplo: correr, caminar,
-saltar, practicar un deporte etc.\n
-¿Que tan frecuente realiza actividad fisica a
-la semana durante 30 minutos al dia como minimo?
-', font('Arial', '', 14))),
-    send(R, display, Preg,point(35,35)),
-    show_picture(L,actividad),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'ninguna vez'), send(Op,append,'1 a 3 veces por semana'),
-    send(Op,append,'3 a 5 veces por semana'), send(Op,append,'toda la semana'),
-    send(R,display,Op,point(60,180)),
-    new(@reglaTres,button('Siguiente',and(message(@prolog,reglaFamilia,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaTres, point(390,350)),
-    send(Window, open_centered).
-
-%Regla para los antescedentes familiares
-reglaFamilia('toda la semana'):-
-    send(@result, selection('HAY POCA PROBABILIDAD\n DE QUE USTED TENGA DIABETES')),
-    clear.
-reglaFamilia('3 a 5 veces por semana'):-
-    send(@result,selection('HAY POCA PROBABILIDAD\n DE QUE USTED TENGA DIABETES')),
-    clear.
-reglaFamilia('1 a 3 veces por semana'):-
-    new(Window, dialog('Antecedentes Familiares')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(360,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(390,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, '¿Se le ha diagnosticado diabetes a\n alguno de sus familiares allegados
-u otros parientes?', font('Arial', '', 14))),
-    send(R, display, Preg,point(35,35)),
-    show_picture(L,familia),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'si, padres, hermanos, o hijos'), send(Op,append,'si, abuelos, tios o primos'),
-    send(Op,append,'no, ninguno'),
-    send(R,display,Op,point(60,140)),
-    new(@reglaCuatro,button('Siguiente',and(message(@prolog,reglaHipertension,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaCuatro, point(390,350)),
-    send(Window, open_centered).
-reglaFamilia('ninguna vez'):-
-     new(Window, dialog('Antecedentes Familiares')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(360,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(390,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, '¿Se le ha diagnosticado diabetes a\n alguno de sus familiares allegados
-u otros parientes?', font('Arial', '', 14))),
-    send(R, display, Preg),
-    show_picture(L,familia),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'si, padres, hermanos, o hijos'), send(Op,append,'si, abuelos, tios o primos'),
-    send(Op,append,'no, ninguno'),
-    send(R,display,Op,point(60,140)),
-    new(@reglaCuatro,button('Siguiente',and(message(@prolog,reglaHipertension,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaCuatro, point(390,350)),
-    send(Window, open_centered).
-
-%Regla Hipertension
-reglaHipertension('si, padres, hermanos, o hijos'):-
-     send(@result, selection('HAY PROBABILIDAD\n DE QUE USTED TENGA DIABETES')),
-     clear.
-reglaHipertension('si, abuelos, tios o primos'):-
-     send(@result, selection('EXISTE LA PROBABILIDAD\n DE QUE USTED TENGA DIABETES')),
-     clear.
-reglaHipertension('no, ninguno'):-
-    new(Window, dialog('Hipertension')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(400,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(350,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, '¿Tiene la presion arterial alta?', font('Arial','',14))),
-    send(R, display, Preg,point(30,40)),
-    show_picture(L,hipertension),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'Si'), send(Op,append,'No'),
-    send(R,display,Op,point(60,120)),
-    new(@reglaCinco,button('Siguiente',and(message(@prolog,reglaEmbarazo,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaCinco, point(390,350)),
-    send(Window, open_centered).
-
-%Regla Embarazo
-reglaEmbarazo('No'):-
-    send(@result, selection('USTED PRESENTA LOS FACTORES\n COMUNES DE LA DIABETES TIPO 2,\n POSIBLE DIABETES')),
-    clear.
-reglaEmbarazo('Si'):-
-     new(Window, dialog('Embarazo')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(400,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(350,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, '¿Ha estado embarazada?', font('Arial', '', 14))),
-    send(R, display, Preg, point(20,35)),
-    show_picture(L,embarazo),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'Si'), send(Op,append,'No'),
-    send(R,display,Op,point(50,100)),
-    new(@reglaSeis,button('Siguiente',and(message(@prolog,reglaGestacional,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaSeis, point(390,350)),
-    send(Window, open_centered).
-
-%Regla Embarazo Gestacional
-reglaGestacional('No'):-
-     send(@result, selection('USTED PRESENTA LOS FACTORES\n COMUNES DE LA DIABETES TIPO 2,\n POSIBLE DIABETES')),
-     clear.
-reglaGestacional('Si'):-
-     new(Window, dialog('Diabetes Gestacional')),
-    send(Window, size, size(780,380)),
-    new(L, dialog_group('')),
-    send(L,size,size(400,320)),
-    new(R, dialog_group('')),
-    send(R,size,size(350,320)),
-    send(Window,append,L),
-    send(Window, append, R, right),
-    new(Preg, label(nombre, '¿Padecio de Diabetes Gestacional durante\n su embarazo?', font('Arial', '', 14))),
-    send(R, display, Preg, point(20,35)),
-    show_picture(L,gestacional),
-    new(Op, menu(seleccione, marked)),
-    send(Op, layout, orientation:= vertical),
-    send(Op, append, 'Si'), send(Op,append,'No'),
-    send(R,display,Op,point(50,100)),
-    new(@reglaSiete,button('Siguiente',and(message(@prolog,reglaEsp,Op?selection),message(Window,destroy),message(Window,free)))),
-    send(Window,display,@reglaSiete, point(390,350)),
-    send(Window, open_centered).
+resource(portada, image, image('streching_menu.jpg')).
+%AGREGAR AQUI LAS IMAGENES DE LOS TRATAMIENTOS CON nombre
+% dieta1,dieta2,dieta3...
+resource(dieta1, image, image('Dieta1.jpg')).
+resource(dieta2, image, image('Dieta2.jpg')).
+resource(dieta3, image, image('Dieta3.jpg')).
+resource(dieta4, image, image('Dieta4.jpg')).
+resource(dieta5, image, image('Dieta5.jpg')).
+resource(img_principal, image, image('streching_menu.jpg')).
+resource(aerobics1, image, image('aerobics1.jpg')).
+resource(aerobics2, image, image('aerobics2.jpg')).
+resource(cycling, image, image('cycling.jpg')).
+resource(natacion1, image, image('natacion1.jpg')).
+resource(natacion2, image, image('natacion2.jpg')).
+resource(estiramientos1, image, image('streching.jpg')).
+resource(estiramientos_varios, image, image('streching_menu.jpg')).
+resource(estiramientos2, image, image('streching2.jpg')).
+resource(caminata1, image, image('walking.jpg')).
+resource(caminata2, image, image('walking2.jpg')).
+resource(articulaciones, image, image('articulaciones.jpg')).
+resource(alto_impacto, image, image('alto_impacto.jpg')).
+resource(hipertension, image, image('tension.jpg')).
+resource(hipotension, image, image('tension.jpg')).
+resource(presion, image, image('presion.jpg')).
+resource(cerveza, image, image('cerveza.jpg')).
+resource(covid, image, image('covid.jpg')).
+resource(problemas_respiratorios, image, image('problemas_respiratorios.jpg')).
+resource(chatarra, image, image('chatarra.jpg')).
+resource(azucar, image, image('azucar.jpg')).
+resource(bb_agua, image, image('bb_agua.jpg')).
 
 
-%Caso final
-reglaEsp('No'):-
-  send(@result, selection('USTED PRESENTA LOS FACTORES\n COMUNES DE LA DIABETES TIPO 2,\n POSIBLE DIABETES')),
-  clear.
-reglaEsp('Si'):-
-  send(@result, selection('USTED PRESENTA UN ALTO \n RIESGO DE TENER DIABETES TIPO 2')),
-  clear.
 
-%Definicion de la funcion principal
-init:-
-    new(Window, dialog('Sistema Diabetes')),
-    send(Window, size, size(800,620)),
-    new(L,dialog_group('')),
-    new(R,dialog_group('')),
-    send(Window,append,L),
-    send(Window,append,R,right),
-    send(L,size,size(400,600)),
-    send(R,size,size(360,600)),
+mostrar_imagen(Pantalla, Imagen) :- new(Figura, figure),
+                                     new(Bitmap, bitmap(resource(Imagen),@on)),
+                                     send(Bitmap, name, 1),
+                                     send(Figura, display, Bitmap),
+                                     send(Figura, status, 1),
+                                     send(Pantalla, display,Figura,point(100,80)).
 
-    new(Bienvenida,label(titulo,'BIENVENIDA A SU',font('Corbel','',20))),
-    new(Bienvenida2,label(titulo,'DIAGNOSTICO',font('Corbel','',20))),
-    new(Sexo,label(titulo,'Mujeres 30-40',font('Arial','',16))),
-    new(@inicio,button('Iniciar Diagnostico', message(@prolog,reglaObesidad))),
+mostrar_imagen_tratamiento(Pantalla, Imagen) :-new(Figura, figure),
+                                     new(Bitmap, bitmap(resource(Imagen),@on)),
+                                     send(Bitmap, name, 1),
+                                     send(Figura, display, Bitmap),
+                                     send(Figura, status, 1),
+                                     send(Pantalla, display,Figura,point(20,100)).
+ nueva_imagen(Ventana, Imagen) :-new(Figura, figure),
+                                new(Bitmap, bitmap(resource(Imagen),@on)),
+                                send(Bitmap, name, 1),
+                                send(Figura, display, Bitmap),
+                                send(Figura, status, 1),
+                                send(Ventana, display,Figura,point(0,0)).
+imagen_pregunta(Ventana, Imagen) :-new(Figura, figure),
+                                new(Bitmap, bitmap(resource(Imagen),@on)),
+                                send(Bitmap, name, 1),
+                                send(Figura, display, Bitmap),
+                                send(Figura, status, 1),
+                                send(Ventana, display,Figura,point(500,60)).
 
-    show_picture(L,portada),
-    send(R,display,Bienvenida,point(40,40)),
-    send(R,display,Bienvenida2,point(65,75)),
-    send(R,display,Sexo,point(50,150)),
-    send(R, display, @inicio,point(30,550)),
-    new(@result, label(l,'Aqui podra consultar su resultado al termino',font('Arial','',14))),
-    send(R, display, @result, point(35,300)),
-    new(BtnSalir, button('Salir', and(message(Window,destroy),message(Window,free),message(@result,free)))),
-    send(R,display,BtnSalir, point(200,550)),
-    send(Window,open_centered).
+botones:-borrado,
+                send(@boton, free),
+                send(@btntratamiento,free),
+                mostrar_diagnostico(Enfermedad),
+                send(@texto, selection('La Recomendacion a partir de los datos es:')),
+                send(@resp1, selection(Enfermedad)),
+                new(@boton, button('Iniciar consulta',
+                message(@prolog, botones)
+                )),
 
-%Funcion para limpiar variables
-clear:-
-    send(@inicio,free),
-    send(@alturaItem,free),send(@pesoItem,free),
-    send(@texto,free),send(@indice,free),
-    send(@reglaUno,free),send(@reglaDos,free),
-    send(@reglaTres,free),send(@reglaCuatro,free),
-    send(@reglaCinco,free),send(@reglaSeis,free),
-    send(@reglaSiete,free).
+                new(@btntratamiento,button('Detalles y Rutina',
+                message(@prolog, mostrar_tratamiento,Enfermedad)
+                )),
+                send(@main, display,@boton,point(20,450)),
+                send(@main, display,@btntratamiento,point(138,450)).
 
-:-init.
+mostrar_tratamiento(X):-new(@tratam, dialog('Recomendacion')),
+                          %new(L, dialog_group('')),
+                          %send(L,size,size(310,320)),
+                          %new(R, dialog_group('')),
+                          %send(R,size,size(420,320)),
+                          %send(@tratam, append,L),
+                          %send(@tratam, append, R, right),
+                          send(@tratam, append, label(nombre, 'Explicacion: \n La gente con diabetes debe cuidarse siempre, \nhacer ejercicio de bajo impacto y como pedimos aqui \n revisarse las piernas constantemente')),
+                          send(@tratam, display,@lblExp1,point(70,51)),
+                          send(@tratam, display,@lblExp2,point(50,80)),
+                          tratamiento(X),
+                          send(@tratam, transient_for, @main),
+                          send(@tratam, open_centered).
+
+tratamiento(X):- send(@lblExp1,selection('\n             La Recomendacion Es:')),
+                 mostrar_imagen_tratamiento(@tratam,X).
+
+%Comportamiento, aqui se ciclan las preguntas al hacer return y almacenar en respuesta, se vuelve a enviar la funcion con los datos enviados
+preguntar(Preg,Resp):-new(Di,dialog('Colsultar Datos:')),
+                        new(L2,label(texto,'Responde las siguientes preguntas')),
+                        id_imagen_preg(Preg,Imagen),
+                        imagen_pregunta(Di,Imagen),
+                        new(La,label(prob,Preg)),
+                        new(B1,button(si,and(message(Di,return,si)))),
+                        new(B2,button(no,and(message(Di,return,no)))),
+                        send(Di, gap, size(25,25)),
+                        send(Di,append(L2)),
+                        send(Di,append(La)),
+                        send(Di,append(B1)),
+                        send(Di,append(B2)),
+                        send(Di,default_button,'si'),
+                        send(Di,open_centered),get(Di,confirm,Answer),
+                        free(Di),
+                        Resp=Answer.
+
+%Pantalla 1
+interfaz_principal:-new(@main,dialog('Sistema Experto (Rutinas para gente con diabetes)',
+        size(1000,1000))),
+        %new(L, dialog_group('')),
+        %send(L,size,size(310,320)),
+        %new(R, dialog_group('')),
+        %send(R,size,size(420,320)),
+        %send(@main, append,L),
+        %send(@main, append, R, right),
+        new(@texto, label(nombre,'El Diagnostico a partir de los datos es:',font('times','roman',18))),
+        new(@resp1, label(nombre,'',font('times','roman',22))),
+        new(@lblExp1, label(nombre,'',font('times','roman',14))),
+        new(@lblExp2, label(nombre,'',font('times','roman',14))),
+        new(@salir,button('SALIR',and(message(@main,destroy),message(@main,free)))),
+        new(@boton, button('Iniciar consulta',message(@prolog, botones))),
+
+        new(@btntratamiento,button('¿Tratamiento?')),
+
+        nueva_imagen(@main, img_principal),
+        send(@main, display,@boton,point(138,450)),
+        send(@main, display,@texto,point(20,350)),
+        send(@main, display,@salir,point(300,450)),
+        send(@main, display,@resp1,point(20,390)),
+        send(@main,open_centered).
+
+       borrado:- send(@resp1, selection('')).
+
+%PAntalla bienvenida
+crea_interfaz_inicio:- new(@interfaz,dialog('Bienvenido al Sistema Experto Diagnosticador',
+  size(1000,1000))),
+
+  mostrar_imagen(@interfaz, portada),
+
+  new(BotonComenzar,button('COMENZAR',and(message(@prolog,interfaz_principal) ,
+  and(message(@interfaz,destroy),message(@interfaz,free)) ))),
+  new(BotonSalir,button('salir',and(message(@interfaz,destroy),message(@interfaz,free)))),
+  send(@interfaz,append(BotonComenzar)),
+  send(@interfaz,append(BotonSalir)),
+  send(@interfaz,open_centered).
+
+  :-crea_interfaz_inicio.
+
+/* BASE DE CONOCIMIENTOS: Sintomas y Enfermedades del Pez Goldfish, contiente ademas
+el identificador de imagenes de acuerdo al  sintoma
+*/
+
+conocimiento('dieta1',
+['¿Practicas algún deporte o alguna actividad física?', '¿Deportes o actividad de contacto?',
+'¿Sufres problemas con tus articulaciones?','¿sufres de hipertensión?']).
+
+conocimiento('dieta2',
+['¿sufre alguna enfermedad cardiaca?', '¿sufres de hipertensión?',
+'¿sufres de hipotensión?']).
+
+conocimiento('dieta3',['¿consumes alcohol?',
+'¿bebes 2 o mas litros de agua al día?']).
+
+conocimiento('dieta4',
+['¿Alguna vez tuvo COVID-19?', '¿Sufre problemas para respirar?']).
+
+conocimiento('dieta5',
+['¿Comes comida chatarra más de tres veces a la semana?', '¿Consumes bebidas con altos niveles de azúcar?']).
+
+id_imagen_preg('¿Practicas algún deporte o alguna actividad física?','cycling').
+id_imagen_preg('¿Sufres problemas con tus articulaciones?','articulaciones').
+id_imagen_preg('¿Deportes o actividad de contacto?','alto_impacto').
+id_imagen_preg('¿sufres de hipertensión?','hipertension').
+id_imagen_preg('¿sufre alguna enfermedad cardiaca?','presion').
+id_imagen_preg('¿sufres de hipotensión?','hipotension').
+id_imagen_preg('¿consumes alcohol?','cerveza').
+id_imagen_preg('¿Alguna vez tuvo COVID-19?','covid').
+id_imagen_preg('¿Sufre problemas para respirar?','problemas_respiratorios').
+id_imagen_preg('¿Comes comida chatarra más de tres veces a la semana?','chatarra').
+id_imagen_preg('¿Consumes bebidas con altos niveles de azúcar?','azucar').
+id_imagen_preg('¿bebes 2 o mas litros de agua al día?','bb_agua').
+
+
+ /* MOTOR DE INFERENCIA: Esta parte del sistema experto se encarga de
+ inferir cual es el diagnostico a partir de las preguntas realizadas
+ */
+:- dynamic conocido/1.
+
+mostrar_diagnostico(X):-haz_diagnostico(X),clean_scratchpad.
+  mostrar_diagnostico(lo_siento_diagnostico_desconocido):-clean_scratchpad .
+
+  haz_diagnostico(Diagnosis):-
+                            obten_hipotesis_y_sintomas(Diagnosis, ListaDeSintomas),
+                            prueba_presencia_de(Diagnosis, ListaDeSintomas).
+
+
+obten_hipotesis_y_sintomas(Diagnosis, ListaDeSintomas):-
+                            conocimiento(Diagnosis, ListaDeSintomas).
+
+
+prueba_presencia_de(_Diagnosis, []).
+prueba_presencia_de(Diagnosis, [Head | Tail]):- prueba_verdad_de(Diagnosis, Head),
+                                              prueba_presencia_de(Diagnosis, Tail).
+
+
+prueba_verdad_de(_Diagnosis, Sintoma):- conocido(Sintoma).
+prueba_verdad_de(Diagnosis, Sintoma):- not(conocido(is_false(Sintoma))),
+pregunta_sobre(Diagnosis, Sintoma, Reply), Reply = 'si'.
+
+
+pregunta_sobre(Diagnosis, Sintoma, Reply):- preguntar(Sintoma,Respuesta),
+                          process(Diagnosis, Sintoma, Respuesta, Reply).
+
+
+process(_Diagnosis, Sintoma, si, si):- asserta(conocido(Sintoma)).
+process(_Diagnosis, Sintoma, no, no):- asserta(conocido(is_false(Sintoma))).
+
+
+clean_scratchpad:- retract(conocido(_X)), fail.
+clean_scratchpad.
+
+
+conocido(_):- fail.
+
+not(X):- X,!,fail.
+not(_).
+
 
